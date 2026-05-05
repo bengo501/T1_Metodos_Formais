@@ -2,7 +2,7 @@ theory T1_2026_1
   imports Main
 begin
 
-(* Coloque aqui o nome dos integrantes do grupo *)
+(* Bernardo Heitz e Giovana Raupp *)
 
 primrec pot :: "nat \<Rightarrow> nat \<Rightarrow> nat" where
 poteq1: "pot x 0 = 1" |
@@ -55,7 +55,6 @@ proof (intro allI)
   show "pot x (m * n) = pot (pot x m) n"
   proof (induction n)
     case 0
-    (* indução em n: recursão de * no segundo argumento; caso n = 0 *)
     show ?case
     proof -
       have mul0: "m * 0 = 0"
@@ -72,12 +71,10 @@ proof (intro allI)
     case (Suc n)
     have ih: "pot x (m * n) = pot (pot x m) n"
       using Suc.IH .
-    (* instanciar t1: expoente (m * n) + m, segundo expoente em t1 é o parâmetro livre n := m *)
     have h_t1: "pot x (m * n + m) = pot x (m * n) * pot x m"
       using t1[rule_format, of x "m * n", where n=m] .
     show ?case
     proof -
-      (* definir multiplicação no sucessor: m * Suc n = m * n + m *)
       have mulSuc: "m * Suc n = m * n + m"
         by (simp only: mult_Suc_right)
       have "pot x (m * Suc n) = pot x (m * n + m)"
@@ -113,7 +110,6 @@ proof (induction xs)
   show "\<forall>ys::nat list. somatorio (cat [] ys) = somatorio [] + somatorio ys"
   proof
     fix ys :: "nat list"
-    (* caso xs = []: cat e somatorio da lista vazia; ys arbitrário fixo *)
     have "somatorio (cat [] ys) = somatorio ys"
       by (simp only: cateq1)
     also have "somatorio ys = 0 + somatorio ys"
@@ -129,7 +125,6 @@ next
   show "\<forall>ys::nat list. somatorio (cat (x # xs) ys) = somatorio (x # xs) + somatorio ys"
   proof
     fix ys :: "nat list"
-    (* passo: HI universal em ys; depois associatividade da soma *)
     have "somatorio (cat (x # xs) ys) = somatorio (x # cat xs ys)"
       by (simp only: cateq2)
     also have "somatorio (x # cat xs ys) = x + somatorio (cat xs ys)"
@@ -147,19 +142,16 @@ qed
 theorem t4: "somatorio (reverso xs) = somatorio xs"
 proof (induction xs)
   case Nil
-  (* caso base: reverso [] = []; mesmo somatório *)
   show ?case
     by (simp only: reveq1)
 next
   case (Cons x xs)
   have ih: "somatorio (reverso xs) = somatorio xs"
     using Cons.IH .
-  (* t3 com xs := reverso xs e ys := [x] *)
   have hcat: "somatorio (cat (reverso xs) [x]) = somatorio (reverso xs) + somatorio [x]"
     using t3[rule_format, where xs="reverso xs", of "[x]"] .
   have hsingle: "somatorio [x] = x"
   proof -
-    (* notação [x] coincide com x # []; depois somaeq2, somaeq1, neutro à direita *)
     have "somatorio [x] = x + somatorio []"
       by (simp only: somaeq2)
     also have "\<dots> = x + 0"

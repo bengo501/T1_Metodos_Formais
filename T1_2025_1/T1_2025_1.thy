@@ -1,0 +1,93 @@
+
+theory T1_2025_1
+  imports Main
+begin
+
+primrec pot :: "nat ⇒ nat ⇒ nat" where
+  poteq1: "pot x 0 = Suc 0" |
+  poteq2: "pot x (Suc y) = x * pot x y"
+
+lemma t1: "pot x (m + n) = pot x m * pot x n"
+  for x m n :: nat
+proof (induction n arbitrary: m)
+  case 0
+  then show ?case by simp
+next
+  case (Suc n)
+  then show ?case
+  proof -
+    have "pot x (m + Suc n) = pot x (Suc (m + n))" by simp
+    also have "... = x * pot x (m + n)" by simp
+    also have "... = x * (pot x m * pot x n)" using Suc.IH by simp
+    also have "... = pot x m * (x * pot x n)" by (simp add: mult.assoc)
+    also have "... = pot x m * pot x (Suc n)" by simp
+    finally show ?thesis .
+  qed
+qed
+
+theorem t2: "pot x (m * n) = pot (pot x m) n"
+  for x m n :: nat
+proof (induction n)
+  case 0
+  show ?case by simp
+next
+  case (Suc n)
+  have "pot x (m * Suc n) = pot x (m * n + m)" by (simp add: mult_Suc_right)
+  also have "... = pot x (m * n) * pot x m" using t1 by simp
+  also have "... = pot (pot x m) n * pot x m" using Suc.IH by simp
+  also have "... = pot (pot x m) (Suc n)" by simp
+  finally show ?thesis by simp
+qed
+
+primrec cat :: "'a list ⇒ 'a list ⇒ 'a list" where
+  cateq1: "cat [] ys = ys" |
+  cateq2: "cat (x#xs) ys = x # cat xs ys"
+
+primrec reverso :: "'a list ⇒ 'a list" where
+  reveq1: "reverso [] = []" |
+  reveq2: "reverso (x#xs) = cat (reverso xs) [x]"
+
+primrec somatorio :: "nat list ⇒ nat" where
+  somaeq1: "somatorio [] = 0" |
+  somaeq2: "somatorio (x#xs) = x + somatorio xs"
+
+lemma somatorio_singleton: "somatorio [x] = x"
+  by simp
+
+lemma t3: "somatorio (cat xs ys) = somatorio xs + somatorio ys"
+  for xs ys :: "nat list"
+proof (induction xs)
+  case Nil
+  then show ?case by simp
+next
+  case (Cons x xs)
+  then show ?case
+  proof -
+    have "somatorio (cat (x # xs) ys) = somatorio (x # cat xs ys)" by simp
+    also have "... = x + somatorio (cat xs ys)" by simp
+    also have "... = x + (somatorio xs + somatorio ys)" using Cons.IH by simp
+    also have "... = (x + somatorio xs) + somatorio ys" by (simp add: add.assoc)
+    also have "... = somatorio (x # xs) + somatorio ys" by simp
+    finally show ?thesis .
+  qed
+qed
+
+theorem t4: "somatorio (reverso xs) = somatorio xs"
+  for xs :: "nat list"
+proof (induction xs)
+  case Nil
+  then show ?case by simp
+next
+  case (Cons x xs)
+  then show ?case
+  proof -
+    have "somatorio (reverso (x # xs)) = somatorio (cat (reverso xs) [x])" by simp
+    also have "... = somatorio (reverso xs) + somatorio [x]" by (simp add: t3)
+    also have "... = somatorio xs + x" using somatorio_singleton Cons.IH by simp
+    also have "... = x + somatorio xs" by (simp add: add.commute)
+    also have "... = somatorio (x # xs)" by simp
+    finally show ?thesis .
+  qed
+qed
+
+end
